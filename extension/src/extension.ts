@@ -1,26 +1,50 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
+import * as path from "path";
+import { exec } from "child_process";
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
-
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "extension" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('extension.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from extension!');
-	});
-
-	context.subscriptions.push(disposable);
+function playFahhhh(soundPath: string): void {
+  const cmds: Partial<Record<NodeJS.Platform, string>> = {
+    darwin: `afplay "${soundPath}"`,
+    win32: `powershell -c (Add-Type -AssemblyName presentationCore; $p = New-Object System.Windows.Media.MediaPlayer; $p.Open('${soundPath}'); $p.Play(); Start-Sleep 3)`,
+    linux: `mpg123 "${soundPath}" 2>/dev/null || ffplay -nodisp -autoexit "${soundPath}" 2>/dev/null`,
+  };
+  const cmd = cmds[process.platform];
+  if (cmd) {
+    exec(cmd);
+  }
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {}
+export function activate(context: vscode.ExtensionContext): void {
+  const soundPath = path.join(context.extensionPath, "fahhhh.mp3");
+
+  let prevErrorCount = 0;
+
+  context.subscriptions.push(
+    vscode.languages.onDidChangeDiagnostics((e) => {
+      const errorCount = e.uris.reduce(
+        (sum, uri) =>
+          sum +
+          vscode.languages
+            .getDiagnostics(uri)
+            .filter((d) => d.severity === vscode.DiagnosticSeverity.Error)
+            .length,
+        0,
+      );
+
+      if (errorCount > prevErrorCount) {
+        playFahhhh(soundPath);
+      }
+      prevErrorCount = errorCount;
+    }),
+
+    vscode.tasks.onDidEndTaskProcess((e) => {
+      if (e.exitCode !== 0) {
+        playFahhhh(soundPath);
+      }
+    }),
+
+    vscode.commands.registerCommand("fahhhh.test", () => playFahhhh(soundPath)),
+  );
+}
+
+export function deactivate(): void {}
