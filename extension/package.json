@@ -1,6 +1,6 @@
 {
   "name": "extension",
-  "displayName": "extension",
+  "displayName": "FAHHHH",
   "description": "When the code or test fails, FAHHHHH sound blasts.",
   "version": "0.0.1",
   "engines": {
@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "extension.helloWorld",
-        "title": "Hello World"
+        "command": "fahhhh.test",
+        "title": "FAHHHH: Test Sound"
       }
     ]
   },

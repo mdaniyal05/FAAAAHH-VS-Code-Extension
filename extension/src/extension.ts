@@ -15,7 +15,7 @@ function playFahhhh(soundPath: string): void {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
-  const soundPath = path.join(context.extensionPath, "fahhhh.mp3");
+  const soundPath = path.join(context.extensionPath, "src", "fahhhh.mp3");
 
   let prevErrorCount = 0;
 
